@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from fuzzywuzzy import process
 
+df = pd.read_csv('file.csv', encoding='utf-8')
+
 def get_product_quantity_category(quantity):
     # Function remains unchanged
     if quantity < 100:
