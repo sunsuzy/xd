@@ -2,23 +2,18 @@ import streamlit as st
 import pandas as pd
 from fuzzywuzzy import process
 
-def get_product_quantity_category(quantity):
-    # Function remains unchanged
-    if quantity < 100:
-        return '1'
-    elif quantity < 250:
-        return '2'
-    elif quantity < 500:
-        return '3'
-    elif quantity < 1000:
-        return '4'
-    elif quantity < 1500:
-        return '5'
-    else:
-        return '6'
+def get_product_price_tier(product, quantity):
+    qty_cols = ['Qty1', 'Qty2', 'Qty3', 'Qty4', 'Qty5', 'Qty6']
+    for col in qty_cols:
+        if quantity <= product[col].values[0]:  # Extract the quantity value from the DataFrame
+            return col
+    return 'Qty6'  # Set to 'Qty6' if quantity is greater than the maximum tier
+
+def get_product_tier_price(product, tier):
+    price_col = f'ItemPriceNet_{tier}'
+    return product[price_col].values[0]  # Extract the price value from the DataFrame
 
 def get_print_quantity_category(quantity):
-    # Function remains unchanged
     if quantity < 50:
         return '1'
     elif quantity < 100:
@@ -37,7 +32,6 @@ def get_print_quantity_category(quantity):
         return '5000'
 
 def calculate_total_print_cost(selected_print, quantity):
-    # Function remains unchanged
     setup_charge = float(selected_print['SetupNet'].values[0])
     applicable_deco_price = selected_print[f'PrintPriceNet_{get_print_quantity_category(quantity)}'].values[0]
     total_print_cost = setup_charge + quantity * applicable_deco_price
@@ -46,8 +40,8 @@ def calculate_total_print_cost(selected_print, quantity):
 def main():
     st.title("XD Connects Calculator")
 
-    product_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
-    print_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
+    product_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/eedd91ae6153a03de0658ec61b099d8cd8648468/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
+    print_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/a2c4565d3aeb632bd552e1fde168ddadf463c78f/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
@@ -92,9 +86,8 @@ def main():
 
         quantity = st.number_input('Enter quantity', min_value=1)
 
-        applicable_price_bar = int(selected_product[f'Qty{get_product_quantity_category(quantity)}'].values[0])
-        applicable_nett_price = selected_product[f'ItemPriceNet_Qty{get_product_quantity_category(quantity)}'].values[0]
-
+        product_tier = get_product_price_tier(selected_product, quantity)
+        applicable_nett_price = get_product_tier_price(selected_product, product_tier)
         total_product_cost = quantity * applicable_nett_price
 
         if print_colors is None:
