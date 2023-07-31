@@ -46,8 +46,8 @@ def calculate_total_print_cost(selected_print, quantity):
 def main():
     st.title("XD Connects Calculator")
 
-    product_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/eedd91ae6153a03de0658ec61b099d8cd8648468/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
-    print_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/a2c4565d3aeb632bd552e1fde168ddadf463c78f/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
+    product_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/799d824760c334a945e5e12b7ae8e9eef28ad674/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
+    print_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/799d824760c334a945e5e12b7ae8e9eef28ad674/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
