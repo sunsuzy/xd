@@ -46,7 +46,7 @@ def calculate_total_print_cost(selected_print, quantity):
 def main():
     st.title("XD Connects Calculator")
 
-    product_price_feed_df = pd.read_csv("C:/Users/Sundeep.CSE/Environments/Test/my_env/Xindao.V2.ProductPrices-nl-nl-C26907.txt", delimiter='\t')
+    product_price_feed_df = pd.read_csv("https://github.com/sunsuzy/xd/blob/eedd91ae6153a03de0658ec61b099d8cd8648468/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
     print_price_feed_df = pd.read_csv("C:/Users/Sundeep.CSE/Environments/Test/my_env/Xindao.V2.PrintPrices-nl-nl-C26907.txt", delimiter='\t')
 
     descriptions = product_price_feed_df['ItemName'].unique()
