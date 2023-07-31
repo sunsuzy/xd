@@ -4,11 +4,29 @@ from fuzzywuzzy import process
 
 def get_product_price_tier(product, quantity):
     qty_cols = ['Qty1', 'Qty2', 'Qty3', 'Qty4', 'Qty5', 'Qty6']
-    for col in qty_cols:
-        if quantity <= product[col].values[0]:  # Extract the quantity value from the DataFrame
-            return col
-    return 'Qty6'  # Set to 'Qty6' if quantity is greater than the maximum tier
+    
+    # Check if the entered quantity exceeds the last tier (Qty6)
+    if quantity >= product[qty_cols[-1]].iloc[0]:
+        return qty_cols[-1]
 
+    # Check each tier to see if the quantity exceeds the next tier
+    for i in range(1, len(qty_cols)):
+        if quantity < product[qty_cols[i]].iloc[0]:
+            return qty_cols[i - 1]
+
+    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
+
+
+    # Check each tier to see if the quantity exceeds the next tier
+    for i in range(1, len(qty_cols)):
+        if quantity <= product[qty_cols[i]].iloc[0]:
+            return qty_cols[i - 1]
+
+    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
+
+
+    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
+    
 def get_product_tier_price(product, tier):
     price_col = f'ItemPriceNet_{tier}'
     return product[price_col].values[0]  # Extract the price value from the DataFrame
