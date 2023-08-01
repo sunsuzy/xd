@@ -7,8 +7,10 @@ def get_product_price_tier(product, quantity):
     if quantity >= product[qty_cols[-1]].iloc[0]:
         return qty_cols[-1]
     for i in range(1, len(qty_cols)):
-        if quantity < product[qty_cols[i]].iloc[0]
-        
+        if quantity < product[qty_cols[i]].iloc[0]:
+            return qty_cols[i - 1]
+    return qty_cols[-1]
+
 def get_product_tier_price(product, tier):
     price_col = f'ItemPriceNet_{tier}'
     price = str(product[price_col].values[0])
