@@ -14,8 +14,10 @@ def get_product_price_tier(product, quantity):
 def get_product_tier_price(product, tier):
     price_col = f'ItemPriceNet_{tier}'
     price = product[price_col].values[0]
+    st.write(f"Price before replace: {price}")
     if isinstance(price, str):
         price = price.replace(',', '')  # Remove commas from the price
+    st.write(f"Price after replace: {price}")
     return float(price)
 
 def get_print_quantity_category(quantity):
