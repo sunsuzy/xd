@@ -21,7 +21,7 @@ def get_product_tier_price(product, tier):
         st.write(f"Price after replace: {price}")
         return float(price)
     else:
-        return None
+        return 0.0  # Set to 0 when the price is None
 
 def get_print_quantity_category(quantity):
     if quantity < 50:
