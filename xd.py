@@ -39,10 +39,10 @@ def calculate_total_print_cost(selected_print, quantity):
     total_print_cost = setup_charge + quantity * applicable_deco_price
     return total_print_cost
 
-def get_max_colors_for_print_code(print_code, print_data_df):
-    max_colors_row = print_data_df[print_data_df['PrintCode'] == print_code]
+def get_max_colors_for_print_code(print_code, item_code, print_data_df):
+    max_colors_row = print_data_df[(print_data_df['PrintCode'] == print_code) & (print_data_df['ItemCode'] == item_code)]
     if not max_colors_row.empty:
-        return max_colors_row['MaxColors'].values[0]
+        return max_colors_row['MaxColors'].max()
     else:
         return None
 
@@ -51,7 +51,7 @@ def main():
 
     product_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
     print_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
-    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t')
+    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t', encoding='ISO-8859-1')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
@@ -89,7 +89,8 @@ def main():
             preferred_print_area = st.selectbox('Select preferred print area', options=print_areas, index=0)
             selected_print_technique = selected_print_technique[selected_print_technique['PrintArea'] == preferred_print_area]
 
-        max_colors = get_max_colors_for_print_code(print_technique[0], print_data_df)
+        max_colors = get_max_colors_for_print_code(print_technique[0], item_code, print_data_df)
+
         if max_colors is not None:
             available_colors = [str(i) for i in range(1, max_colors + 1)]
         else:
