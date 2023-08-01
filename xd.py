@@ -7,18 +7,16 @@ def get_product_price_tier(product, quantity):
     if quantity >= product[qty_cols[-1]].iloc[0]:
         return qty_cols[-1]
     for i in range(1, len(qty_cols)):
-        if quantity < product[qty_cols[i]].iloc[0]:
-            return qty_cols[i - 1]
-    return qty_cols[-1]
-
+        if quantity < product[qty_cols[i]].iloc[0]
+        
 def get_product_tier_price(product, tier):
     price_col = f'ItemPriceNet_{tier}'
-    price = product[price_col].values[0]
+    price = str(product[price_col].values[0])
     st.write(f"Price before replace: {price}")
     price = price.replace(',', '')
     st.write(f"Price after replace: {price}")
     return float(price)
-    
+
 def get_print_quantity_category(quantity):
     if quantity < 50:
         return '1'
