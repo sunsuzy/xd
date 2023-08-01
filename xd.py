@@ -51,7 +51,7 @@ def main():
 
     product_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
     print_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
-    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t', encoding='ISO-8859-1')
+    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
