@@ -4,32 +4,16 @@ from fuzzywuzzy import process
 
 def get_product_price_tier(product, quantity):
     qty_cols = ['Qty1', 'Qty2', 'Qty3', 'Qty4', 'Qty5', 'Qty6']
-    
-    # Check if the entered quantity exceeds the last tier (Qty6)
     if quantity >= product[qty_cols[-1]].iloc[0]:
         return qty_cols[-1]
-
-    # Check each tier to see if the quantity exceeds the next tier
     for i in range(1, len(qty_cols)):
         if quantity < product[qty_cols[i]].iloc[0]:
             return qty_cols[i - 1]
+    return qty_cols[-1]
 
-    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
-
-
-    # Check each tier to see if the quantity exceeds the next tier
-    for i in range(1, len(qty_cols)):
-        if quantity <= product[qty_cols[i]].iloc[0]:
-            return qty_cols[i - 1]
-
-    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
-
-
-    return qty_cols[-1]  # If not within any tier range, set to 'Qty6' as the default
-    
 def get_product_tier_price(product, tier):
     price_col = f'ItemPriceNet_{tier}'
-    return product[price_col].values[0]  # Extract the price value from the DataFrame
+    return product[price_col].values[0]
 
 def get_print_quantity_category(quantity):
     if quantity < 50:
@@ -55,11 +39,19 @@ def calculate_total_print_cost(selected_print, quantity):
     total_print_cost = setup_charge + quantity * applicable_deco_price
     return total_print_cost
 
+def get_max_colors_for_print_code(print_code, print_data_df):
+    max_colors_row = print_data_df[print_data_df['PrintCode'] == print_code]
+    if not max_colors_row.empty:
+        return max_colors_row['MaxColors'].values[0]
+    else:
+        return None
+
 def main():
     st.title("XD Connects Calculator")
 
     product_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
     print_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
+    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t', encoding='ISO-8859-1')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
@@ -89,18 +81,23 @@ def main():
                 print_techniques_with_names.append((technique, technique_df['PrintTechnique'].values[0]))
         print_technique = st.selectbox('Select a print technique', options=print_techniques_with_names, format_func=lambda x: f"{x[0]} - {x[1]}")
 
-        selected_print_technique = print_price_feed_df[print_price_feed_df['PrintCode'] == print_technique[0]]
-        selected_print_technique['NrOfColors'] = pd.to_numeric(selected_print_technique['NrOfColors'], errors='coerce')
+        selected_print_technique = print_price_feed_df[print_price_feed_df['PrintCode'] == print_technique[0]].copy()
+        selected_print_technique.loc[:, 'NrOfColors'] = pd.to_numeric(selected_print_technique['NrOfColors'], errors='coerce')
 
-        # Adding the dropdown for selecting the preferred print area
         if print_technique[0] in ['Embroidery', 'Embroidery 3D', 'Embroidery badge', 'Hot Stamping', 'Leather badge', 'Printed badge']:
             print_areas = selected_print_technique['PrintArea'].dropna().unique()
             preferred_print_area = st.selectbox('Select preferred print area', options=print_areas, index=0)
             selected_print_technique = selected_print_technique[selected_print_technique['PrintArea'] == preferred_print_area]
 
-        available_colors = selected_print_technique['NrOfColors'].dropna().unique()
-        available_colors = [str(int(color)) if not pd.isna(color) else 'None' for color in available_colors]
-        print_colors = st.selectbox('Enter the number of print colors', options=available_colors, index=len(available_colors) - 1)
+        max_colors = get_max_colors_for_print_code(print_technique[0], print_data_df)
+        if max_colors is not None:
+            available_colors = [str(i) for i in range(1, max_colors + 1)]
+        else:
+            available_colors = selected_print_technique['NrOfColors'].dropna().unique()
+            available_colors = [str(int(color)) if not pd.isna(color) else 'None' for color in available_colors]
+
+        print_colors = st.selectbox('Enter the number of print colors', options=available_colors, index=0)
+
 
         quantity = st.number_input('Enter quantity', min_value=1)
 
@@ -113,15 +110,13 @@ def main():
         else:
             number_of_colors = int(float(print_colors))
 
-        # Select print with matching color number or where 'NrOfColors' is NaN
         selected_print = selected_print_technique[(selected_print_technique['NrOfColors'].isna()) | 
                                                   (selected_print_technique['NrOfColors'] == number_of_colors)]
 
-        # If 'NrOfColors' is NaN, look at 'PrintArea'
         if selected_print['NrOfColors'].isna().all():
-            if selected_print['PrintArea'].isna().all():  # If 'PrintArea' is also NaN, return the first row
+            if selected_print['PrintArea'].isna().all():
                 selected_print = selected_print.iloc[0:1]
-            else:  # If 'PrintArea' is not NaN, select rows with not NaN 'PrintArea'
+            else:
                 selected_print = selected_print[selected_print['PrintArea'].notna()]
 
         if selected_print.empty:
