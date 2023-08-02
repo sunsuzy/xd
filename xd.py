@@ -12,8 +12,18 @@ def get_product_price_tier(product, quantity):
     return qty_cols[-1]
 
 def get_product_tier_price(product, tier):
-    price_col = f'ItemPriceNet_{tier}'
-    return product[price_col].values[0]
+    tier_number = int(tier[3:])
+    price_tiers = [f'ItemPriceNet_Qty{i}' for i in range(1, 7)]
+    tier = min(tier_number, len(price_tiers))
+    for i in range(tier - 1, -1, -1):
+        price_col = price_tiers[i]
+        price = product[price_col].values[0]
+        if pd.notna(price):
+            return price
+    # If the requested tier is missing, return the price from ItemPriceNet_Qty1 if available
+    if pd.notna(product['ItemPriceNet_Qty1'].values[0]):
+        return product['ItemPriceNet_Qty1'].values[0]
+    return None
 
 def get_print_quantity_category(quantity):
     if quantity < 50:
@@ -51,7 +61,7 @@ def main():
 
     product_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.ProductPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
     print_price_feed_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintPrices-nl-nl-C26907%20(1).txt", delimiter='\t')
-    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t')
+    print_data_df = pd.read_csv("https://raw.githubusercontent.com/sunsuzy/xd/main/Xindao.V2.PrintData-nl-nl-C26907.txt", delimiter='\t', encoding='ISO-8859-1')
 
     descriptions = product_price_feed_df['ItemName'].unique()
     query = st.text_input('Search for a product or enter an item code')
@@ -154,4 +164,4 @@ def main():
         st.write('No matching products found.')
 
 if __name__ == "__main__":
-    main()  
+    main()
